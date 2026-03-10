@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robotic Hacking Village — DEF CON 34</title>
+  <style>
+    :root {
+      --green:  #00ff41;
+      --green2: #00c832;
+      --bg:     #0a0a0a;
+      --bg2:    #111111;
+      --bg3:    #1a1a1a;
+      --text:   #e0e0e0;
+      --muted:  #888888;
+      --border: #222222;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', Courier, monospace;
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 56px;
+    }
+
+    .nav-logo {
+      color: var(--green);
+      font-size: 1rem;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      text-decoration: none;
+    }
+
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--green); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 39px,
+          rgba(0,255,65,0.03) 39px,
+          rgba(0,255,65,0.03) 40px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 39px,
+          rgba(0,255,65,0.03) 39px,
+          rgba(0,255,65,0.03) 40px
+        );
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      color: var(--green);
+      font-size: 0.8rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0.8;
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 7vw, 5.5rem);
+      font-weight: bold;
+      color: #ffffff;
+      letter-spacing: 0.05em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .hero-title span { color: var(--green); }
+
+    .hero-subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.15rem);
+      color: var(--muted);
+      max-width: 580px;
+      margin: 0 auto 2.5rem;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .hero-meta-item {
+      color: var(--muted);
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+    }
+
+    .hero-meta-item strong { color: var(--green); }
+
+    .btn-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: #000;
+      border-color: var(--green);
+      font-weight: bold;
+    }
+
+    .btn-primary:hover {
+      background: var(--green2);
+      border-color: var(--green2);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    .btn-outline:hover {
+      background: rgba(0,255,65,0.08);
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 5rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      color: var(--green);
+      font-size: 0.75rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      color: #fff;
+      margin-bottom: 1rem;
+      letter-spacing: 0.03em;
+    }
+
+    .section-body {
+      color: var(--muted);
+      max-width: 680px;
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0 2rem;
+    }
+
+    /* ── ABOUT ── */
+    #about .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      margin-top: 3rem;
+      align-items: start;
+    }
+
+    .about-statement {
+      font-size: 1.2rem;
+      color: #fff;
+      line-height: 1.7;
+      border-left: 3px solid var(--green);
+      padding-left: 1.5rem;
+    }
+
+    .about-statement em {
+      color: var(--green);
+      font-style: normal;
+    }
+
+    .about-points { list-style: none; margin-top: 0; }
+
+    .about-points li {
+      padding: 0.6rem 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .about-points li::before {
+      content: '▸';
+      color: var(--green);
+      flex-shrink: 0;
+    }
+
+    /* ── ACTIVITIES ── */
+    #activities { background: transparent; }
+
+    .activities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .activity-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 2rem 1.75rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .activity-card:hover {
+      border-color: var(--green);
+      transform: translateY(-3px);
+    }
+
+    .activity-icon {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .activity-title {
+      color: #fff;
+      font-size: 1rem;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .activity-desc {
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .activity-tag {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.2rem 0.6rem;
+      border: 1px solid var(--green);
+      color: var(--green);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+    }
+
+    /* ── SCOPE ── */
+    #scope .scope-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 3rem;
+    }
+
+    .scope-item {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .scope-item::before {
+      content: '//';
+      color: var(--green);
+      opacity: 0.6;
+      flex-shrink: 0;
+    }
+
+    /* ── CTA ── */
+    #cta {
+      text-align: center;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 5rem 2rem;
+    }
+
+    #cta .section-title { max-width: 600px; margin: 0 auto 1rem; }
+    #cta .section-body  { margin: 0 auto 2.5rem; text-align: center; }
+
+    /* ── CONTACT ── */
+    #contact {
+      text-align: center;
+    }
+
+    .contact-email {
+      color: var(--green);
+      font-size: 1.1rem;
+      text-decoration: none;
+      letter-spacing: 0.05em;
+    }
+
+    .contact-email:hover { text-decoration: underline; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+    }
+
+    footer span { color: var(--green); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 720px) {
+      #about .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .nav-links { gap: 1.2rem; }
+    }
+
+    @media (max-width: 480px) {
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="#">[ RHV ]</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#activities">Activities</a></li>
+      <li><a href="#scope">Scope</a></li>
+      <li><a href="#cta">Speak</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <p class="hero-eyebrow">DEF CON 34 &nbsp;·&nbsp; Las Vegas</p>
+    <h1 class="hero-title">
+      ROBOTIC<br><span>HACKING</span><br>VILLAGE
+    </h1>
+    <p class="hero-subtitle">
+      Where Physical AI meets offensive security.<br>
+      Robots that move, sense, decide, and act — are they safe?
+    </p>
+    <div class="hero-meta">
+      <span class="hero-meta-item"><strong>DATE</strong> &nbsp; August 6–9, 2026</span>
+      <span class="hero-meta-item"><strong>LOCATION</strong> &nbsp; Las Vegas, NV</span>
+      <span class="hero-meta-item"><strong>EVENT</strong> &nbsp; DEF CON 34</span>
+    </div>
+    <div class="btn-group">
+      <a class="btn btn-primary" href="#cta">Submit a Talk</a>
+      <a class="btn btn-outline" href="#activities">View Activities</a>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ABOUT -->
+  <section id="about">
+    <p class="section-label">// about</p>
+    <h2 class="section-title">What Is Robotic Hacking Village?</h2>
+    <div class="about-grid">
+      <div>
+        <p class="about-statement">
+          A dedicated DEF CON village focused on the
+          <em>security and safety</em> of physical AI systems and robotics —
+          machines that move, sense, decide, and act in the real world.
+        </p>
+        <br/>
+        <p class="section-body">
+          We bring together security researchers, hackers, engineers, and
+          industry to explore the attack surface of the next generation of
+          intelligent machines. Because a compromise is not just a data breach —
+          it can cause physical harm.
+        </p>
+      </div>
+      <ul class="about-points">
+        <li>Robots are no longer science fiction — they are in factories, warehouses, hospitals, and homes</li>
+        <li>Physical AI systems introduce an entirely new and underexplored attack surface</li>
+        <li>Security research must keep pace with the speed of deployment</li>
+        <li>Safety and security must be engineered in — not bolted on</li>
+        <li>The hacker community is best positioned to find what defenders miss</li>
+      </ul>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ACTIVITIES -->
+  <section id="activities">
+    <p class="section-label">// activities</p>
+    <h2 class="section-title">What's Happening at RHV</h2>
+    <p class="section-body">
+      Four tracks designed for every skill level — from first-time robot hackers
+      to seasoned embedded security researchers.
+    </p>
+    <div class="activities-grid">
+
+      <div class="activity-card">
+        <div class="activity-icon">🎤</div>
+        <div class="activity-title">Call for Speakers</div>
+        <div class="activity-desc">
+          Submit your research on robotics attack and defense.
+          All skill levels welcome. Original, unpublished work preferred.
+        </div>
+        <span class="activity-tag">CFP OPEN</span>
+      </div>
+
+      <div class="activity-card">
+        <div class="activity-icon">🏁</div>
+        <div class="activity-title">CTF</div>
+        <div class="activity-desc">
+          Capture the Flag competition targeting real robotic systems and
+          Physical AI platforms. Designed for all experience levels.
+        </div>
+        <span class="activity-tag">COMPETITION</span>
+      </div>
+
+      <div class="activity-card">
+        <div class="activity-icon">🤖</div>
+        <div class="activity-title">Physical AI Game</div>
+        <div class="activity-desc">
+          Team-based challenges on physical AI platforms.
+          Exploit, defend, and demonstrate impact in a controlled environment.
+        </div>
+        <span class="activity-tag">TEAM EVENT</span>
+      </div>
+
+      <div class="activity-card">
+        <div class="activity-icon">🛠</div>
+        <div class="activity-title">Physical AI Hacking 101</div>
+        <div class="activity-desc">
+          Hands-on beginner playground. Learn to hack robots — safely.
+          No prior experience required.
+        </div>
+        <span class="activity-tag">BEGINNER FRIENDLY</span>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- SCOPE -->
+  <section id="scope">
+    <p class="section-label">// scope</p>
+    <h2 class="section-title">Our Focus Areas</h2>
+    <p class="section-body">
+      Physical AI &amp; Robotics Security — covering the full stack from silicon to cloud.
+    </p>
+    <div class="scope-grid">
+      <div class="scope-item">Hardware &amp; Firmware</div>
+      <div class="scope-item">ROS2 / Middleware</div>
+      <div class="scope-item">AI Model Integrity</div>
+      <div class="scope-item">Sensor Spoofing</div>
+      <div class="scope-item">Network &amp; Cloud APIs</div>
+      <div class="scope-item">Supply Chain Risks</div>
+      <div class="scope-item">Autonomous Decision Logic</div>
+      <div class="scope-item">Safety-Critical Vulnerabilities</div>
+      <div class="scope-item">Physical Manipulation</div>
+      <div class="scope-item">Adversarial ML</div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- CTA -->
+  <div id="cta">
+    <p class="section-label">// call for speakers</p>
+    <h2 class="section-title">Share Your Research at DEF CON 34</h2>
+    <p class="section-body">
+      Have you found a vulnerability in a robotic system, Physical AI platform, or
+      autonomous device? We want to hear from you. All research stages welcome —
+      from initial findings to full exploits.
+    </p>
+    <div class="btn-group">
+      <a class="btn btn-primary" href="mailto:RoboticHackingVillage@gmail.com">Submit a Talk</a>
+      <a class="btn btn-outline" href="mailto:RoboticHackingVillage@gmail.com">Get Involved</a>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <section id="contact" style="text-align:center;">
+    <p class="section-label">// contact</p>
+    <h2 class="section-title">Get In Touch</h2>
+    <p class="section-body" style="margin: 0 auto 1.5rem;">
+      Questions about speaking, sponsorship, volunteering, or the CTF?
+    </p>
+    <a class="contact-email" href="mailto:RoboticHackingVillage@gmail.com">
+      RoboticHackingVillage@gmail.com
+    </a>
+    <br/><br/>
+    <p style="color: var(--muted); font-size:0.8rem; letter-spacing:0.05em;">
+      www.RoboticHackingVillage.com
+    </p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>[ RHV ]</span> &nbsp; Robotic Hacking Village &nbsp;·&nbsp;
+    DEF CON 34 &nbsp;·&nbsp; Las Vegas &nbsp;·&nbsp; August 6–9, 2026
+  </footer>
+
+</body>
+</html>
